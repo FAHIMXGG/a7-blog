@@ -40,6 +40,7 @@ function NavItems({ onClick }: { onClick?: () => void }) {
 
 export default function Navbar() {
   const { data: session } = useSession();
+  console.log(session)
   const router = useRouter();
 
   const doLogout = async () => {
