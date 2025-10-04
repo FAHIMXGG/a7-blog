@@ -35,9 +35,10 @@ export default function LoginPage() {
         await fetch("/api/auth/sync-cookie", { method: "POST" })
 
         toast.success("Logged in successfully")
-        router.push("/dashboard")
+        router.push("/")
       } else {
-        toast.error(res?.error || "Invalid credentials")
+        toast.error( "Invalid credentials")
+        
       }
     } catch (err: any) {
       toast.error(err?.message || "Something went wrong")

@@ -14,6 +14,7 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 // (Optional) if you use react-hot-toast, uncomment:
 // import toast from "react-hot-toast";
 
@@ -34,18 +35,16 @@ export default function DeleteBlogButton({ id, title }: Props) {
     try {
       // Calls your working example route that proxies to BACKEND_URL DELETE
       const res = await fetch(`/api/blogs/${id}`, { method: "POST" });
-
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         throw new Error(data?.message || "Failed to delete post");
       }
 
-      // toast?.success?.("Post deleted");
-      setOpen(false);
-      router.refresh();
+      toast?.success?.("Post deleted");
+      setOpen(false); // Use router.push() to redirect to the blogs dashboard
+      router.push("/dashboard/blogs");
     } catch (e: any) {
-      setErr(e.message || "Something went wrong");
-      // toast?.error?.(e.message || "Failed to delete");
+      setErr(e.message || "Something went wrong"); // toast?.error?.(e.message || "Failed to delete");
     } finally {
       setLoading(false);
     }
@@ -69,9 +68,7 @@ export default function DeleteBlogButton({ id, title }: Props) {
           </AlertDialogDescription>
         </AlertDialogHeader>
 
-        {err ? (
-          <p className="text-sm text-red-600">{err}</p>
-        ) : null}
+        {err ? <p className="text-sm text-red-600">{err}</p> : null}
 
         <AlertDialogFooter>
           <AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
