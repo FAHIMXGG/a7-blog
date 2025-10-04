@@ -1,12 +1,15 @@
 import { z } from "zod";
 
+const urlOpt = z.string().url().nullable().optional()
+
 export const blogCreateSchema = z.object({
   title: z.string().min(3, "Title is required"),
   content: z.string().min(10, "Content is too short"),
-  excerpt: z.string().optional(),
+  excerpt: z.string().min(10, "Content is too short"),
   tags: z.array(z.string()).optional(),
   categories: z.array(z.string()).optional(),
   isFeatured: z.boolean().default(false),
+  thumbnailUrl: urlOpt,
 });
 
 export const blogUpdateSchema = blogCreateSchema.partial().extend({
@@ -15,6 +18,7 @@ export const blogUpdateSchema = blogCreateSchema.partial().extend({
 
 // INPUT = before defaults applied (isFeatured? optional)
 export type BlogCreateFormValues = z.input<typeof blogCreateSchema>;
+export type BlogUpdateFormValues = z.input<typeof blogUpdateSchema>
 
 // OUTPUT = after parsing (isFeatured always boolean)
 export type BlogCreateValues = z.output<typeof blogCreateSchema>;
