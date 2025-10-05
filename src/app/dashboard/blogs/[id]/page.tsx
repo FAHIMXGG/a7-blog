@@ -1,3 +1,4 @@
+// src/app/dashboard/blogs/[id]/page.tsx
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -6,6 +7,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ArrowLeft, Calendar, Eye, Tag, FolderOpen, Star, Edit, Shield } from "lucide-react";
 import Image from "next/image";
 import DeleteBlogButton from "@/components/DeleteBlogButton";
+
+// If you don't already have this helper, keep it inline:
+const isUnoptimizedCdn = (url?: string) =>
+  !!url && /(^https?:\/\/[^/]*\.ufs\.sh\/)|(^https?:\/\/utfs\.io\/)/i.test(url);
 
 // ---- Config: prefer server-only BACKEND_URL, then public, then hardcoded fallback
 const API_BASE =
@@ -32,12 +37,13 @@ async function getPost(id: string) {
   }
 }
 
+// ✅ Note the Promise type and the await on params
 export default async function BlogView({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const { id } = params; // <-- not a Promise
+  const { id } = await params; // <-- await props in React 19 / Next 15
   const post = await getPost(id);
   if (!post) return notFound();
 
@@ -69,8 +75,11 @@ export default async function BlogView({
                 src={post.thumbnailUrl || "/placeholder.svg"}
                 alt={post.title || "thumbnail"}
                 fill
+                sizes="100vw"
                 className="object-cover"
                 priority
+                // avoid optimizer timeouts for flaky CDNs
+                unoptimized={isUnoptimizedCdn(post.thumbnailUrl)}
               />
               {post.isFeatured && (
                 <div className="absolute top-3 sm:top-4 right-3 sm:right-4">

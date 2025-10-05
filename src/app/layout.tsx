@@ -3,6 +3,7 @@ import "./globals.css";
 import Providers from "./providers";
 import Navbar from "@/components/Navbar";
 import { Toaster as HotToaster } from "react-hot-toast"
+import { Footer } from "@/components/Footer";
 
 
 export const metadata: Metadata = {
@@ -22,6 +23,7 @@ export default function RootLayout({
           <Navbar />
           <HotToaster position="top-center" />
           <main className="container mx-auto px-4 py-6">{children}</main>
+          <Footer/>
         </Providers>
       </body>
     </html>
