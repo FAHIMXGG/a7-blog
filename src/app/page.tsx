@@ -5,6 +5,10 @@ import { ArrowRight, Sparkles, TrendingUp, Clock, Eye, Calendar } from "lucide-r
 import { Button } from "@/components/ui/button";
 import { isUnoptimizedCdn } from "@/lib/is-unoptimized-cdn";
 
+// Tiny inline blur placeholder (universal fallback)
+const TINY_BLUR =
+  "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iOSIgdmlld0JveD0iMCAwIDE2IDkiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjE2IiBoZWlnaHQ9IjkiIGZpbGw9IiNmMmYyZjIiLz48L3N2Zz4=";
+
 // --- Data fetchers ---
 async function getFeaturedPosts() {
   try {
@@ -69,65 +73,74 @@ async function FeaturedPosts() {
 
   return (
     <div className="grid gap-6 md:gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-      {posts.map((post: any, index: number) => (
-        <Link
-          key={post._id}
-          href={`/blog/${post._id}`}
-          className="group relative overflow-hidden rounded-2xl bg-background/40 backdrop-blur-xl border border-white/10 hover:border-white/20 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-amber-500/10"
-          style={{ animationDelay: `${index * 100}ms` }}
-        >
-          {/* Featured Badge */}
-          <div className="absolute top-4 right-4 z-10 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-500/90 to-orange-500/90 backdrop-blur-sm text-white text-xs font-medium shadow-lg">
-            <Sparkles className="h-3 w-3" />
-            Featured
-          </div>
+      {posts.map((post: any, index: number) => {
+        const isFirst = index === 0; // only first gets eager load
 
-          {/* Thumbnail */}
-          <div className="relative h-48 sm:h-56 overflow-hidden bg-gradient-to-br from-amber-500/5 to-orange-500/5">
-            {post.thumbnailUrl ? (
-              <Image
-                src={post.thumbnailUrl || "/placeholder.svg"}
-                alt={post.title}
-                fill
-                // IMPORTANT: give sizes for fill images
-                sizes="(min-width:1024px) 33vw, (min-width:640px) 50vw, 100vw"
-                className="object-cover group-hover:scale-110 transition-transform duration-700"
-                // Skip optimizer for flaky CDNs to avoid TIMEOUT 500s
-                unoptimized={isUnoptimizedCdn(post.thumbnailUrl)}
-                priority={index === 0} // first card gets priority
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <Sparkles className="h-12 w-12 text-amber-500/20" />
-              </div>
-            )}
-            <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-          </div>
+        return (
+          <Link
+            key={post._id}
+            href={`/blog/${post._id}`}
+            className="group relative overflow-hidden rounded-2xl bg-background/40 backdrop-blur-xl border border-white/10 hover:border-white/20 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-amber-500/10"
+            style={{ animationDelay: `${index * 100}ms` }}
+          >
+            {/* Featured Badge */}
+            <div className="absolute top-4 right-4 z-10 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-500/90 to-orange-500/90 backdrop-blur-sm text-white text-xs font-medium shadow-lg">
+              <Sparkles className="h-3 w-3" />
+              Featured
+            </div>
 
-          {/* Content */}
-          <div className="p-5 sm:p-6 space-y-3">
-            <h3 className="text-lg sm:text-xl font-semibold line-clamp-2 group-hover:text-amber-500 transition-colors duration-300">
-              {post.title}
-            </h3>
-            <p className="text-sm text-muted-foreground line-clamp-2">{post.excerpt}</p>
+            {/* Thumbnail */}
+            <div className="relative h-48 sm:h-56 overflow-hidden bg-gradient-to-br from-amber-500/5 to-orange-500/5">
+              {post.thumbnailUrl ? (
+                <Image
+                  src={post.thumbnailUrl || "/placeholder.svg"}
+                  alt={post.title}
+                  fill
+                  sizes="(min-width:1024px) 33vw, (min-width:640px) 50vw, 100vw"
+                  className="object-cover group-hover:scale-110 transition-transform duration-700"
+                  unoptimized={isUnoptimizedCdn(post.thumbnailUrl)}
+                  // Lazy/eager behavior
+                  priority={isFirst}
+                  loading={isFirst ? "eager" : "lazy"}
+                  fetchPriority={isFirst ? "high" : "auto"}
+                  decoding="async"
+                  // Blur-up placeholder
+                  placeholder="blur"
+                  blurDataURL={TINY_BLUR}
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <Sparkles className="h-12 w-12 text-amber-500/20" />
+                </div>
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            </div>
 
-            {/* Metadata */}
-            <div className="flex items-center gap-4 text-xs text-muted-foreground pt-2">
-              <div className="flex items-center gap-1">
-                <Eye className="h-3.5 w-3.5" />
-                {post.views || 0}
-              </div>
-              <div className="flex items-center gap-1">
-                <Calendar className="h-3.5 w-3.5" />
-                {new Date(post.createdAt).toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                })}
+            {/* Content */}
+            <div className="p-5 sm:p-6 space-y-3">
+              <h3 className="text-lg sm:text-xl font-semibold line-clamp-2 group-hover:text-amber-500 transition-colors duration-300">
+                {post.title}
+              </h3>
+              <p className="text-sm text-muted-foreground line-clamp-2">{post.excerpt}</p>
+
+              {/* Metadata */}
+              <div className="flex items-center gap-4 text-xs text-muted-foreground pt-2">
+                <div className="flex items-center gap-1">
+                  <Eye className="h-3.5 w-3.5" />
+                  {post.views || 0}
+                </div>
+                <div className="flex items-center gap-1">
+                  <Calendar className="h-3.5 w-3.5" />
+                  {new Date(post.createdAt).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </div>
               </div>
             </div>
-          </div>
-        </Link>
-      ))}
+          </Link>
+        );
+      })}
     </div>
   );
 }
@@ -145,71 +158,82 @@ async function LatestPosts() {
 
   return (
     <div className="grid gap-6 md:gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-      {posts.map((post: any, index: number) => (
-        <Link
-          key={post._id}
-          href={`/blog/${post._id}`}
-          className="group relative overflow-hidden rounded-2xl bg-background/40 backdrop-blur-xl border border-white/10 hover:border-white/20 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-cyan-500/10"
-          style={{ animationDelay: `${index * 100}ms` }}
-        >
-          {/* Thumbnail */}
-          <div className="relative h-48 sm:h-56 overflow-hidden bg-gradient-to-br from-cyan-500/5 to-blue-500/5">
-            {post.thumbnailUrl ? (
-              <Image
-                src={post.thumbnailUrl || "/placeholder.svg"}
-                alt={post.title}
-                fill
-                sizes="(min-width:1024px) 33vw, (min-width:640px) 50vw, 100vw"
-                className="object-cover group-hover:scale-110 transition-transform duration-700"
-                unoptimized={isUnoptimizedCdn(post.thumbnailUrl)}
-                priority={index === 0}
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <Clock className="h-12 w-12 text-cyan-500/20" />
-              </div>
-            )}
-            <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-          </div>
+      {posts.map((post: any, index: number) => {
+        const isFirst = index === 0; // only first gets eager load
 
-          {/* Content */}
-          <div className="p-5 sm:p-6 space-y-3">
-            <h3 className="text-lg sm:text-xl font-semibold line-clamp-2 group-hover:text-cyan-500 transition-colors duration-300">
-              {post.title}
-            </h3>
-            <p className="text-sm text-muted-foreground line-clamp-2">{post.excerpt}</p>
+        return (
+          <Link
+            key={post._id}
+            href={`/blog/${post._id}`}
+            className="group relative overflow-hidden rounded-2xl bg-background/40 backdrop-blur-xl border border-white/10 hover:border-white/20 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-cyan-500/10"
+            style={{ animationDelay: `${index * 100}ms` }}
+          >
+            {/* Thumbnail */}
+            <div className="relative h-48 sm:h-56 overflow-hidden bg-gradient-to-br from-cyan-500/5 to-blue-500/5">
+              {post.thumbnailUrl ? (
+                <Image
+                  src={post.thumbnailUrl || "/placeholder.svg"}
+                  alt={post.title}
+                  fill
+                  sizes="(min-width:1024px) 33vw, (min-width:640px) 50vw, 100vw"
+                  className="object-cover group-hover:scale-110 transition-transform duration-700"
+                  unoptimized={isUnoptimizedCdn(post.thumbnailUrl)}
+                  // Lazy/eager behavior
+                  priority={isFirst}
+                  loading={isFirst ? "eager" : "lazy"}
+                  fetchPriority={isFirst ? "high" : "auto"}
+                  decoding="async"
+                  // Blur-up placeholder
+                  placeholder="blur"
+                  blurDataURL={TINY_BLUR}
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <Clock className="h-12 w-12 text-cyan-500/20" />
+                </div>
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            </div>
 
-            {/* Tags */}
-            {post.tags && post.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 pt-2">
-                {post.tags.slice(0, 3).map((tag: string, i: number) => (
-                  <span
-                    key={i}
-                    className="px-2 py-1 text-xs rounded-full bg-cyan-500/10 text-cyan-500 border border-cyan-500/20"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            )}
+            {/* Content */}
+            <div className="p-5 sm:p-6 space-y-3">
+              <h3 className="text-lg sm:text-xl font-semibold line-clamp-2 group-hover:text-cyan-500 transition-colors duration-300">
+                {post.title}
+              </h3>
+              <p className="text-sm text-muted-foreground line-clamp-2">{post.excerpt}</p>
 
-            {/* Metadata */}
-            <div className="flex items-center gap-4 text-xs text-muted-foreground pt-2">
-              <div className="flex items-center gap-1">
-                <Eye className="h-3.5 w-3.5" />
-                {post.views || 0}
-              </div>
-              <div className="flex items-center gap-1">
-                <Calendar className="h-3.5 w-3.5" />
-                {new Date(post.createdAt).toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                })}
+              {/* Tags */}
+              {post.tags && post.tags.length > 0 && (
+                <div className="flex flex-wrap gap-2 pt-2">
+                  {post.tags.slice(0, 3).map((tag: string, i: number) => (
+                    <span
+                      key={i}
+                      className="px-2 py-1 text-xs rounded-full bg-cyan-500/10 text-cyan-500 border border-cyan-500/20"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* Metadata */}
+              <div className="flex items-center gap-4 text-xs text-muted-foreground pt-2">
+                <div className="flex items-center gap-1">
+                  <Eye className="h-3.5 w-3.5" />
+                  {post.views || 0}
+                </div>
+                <div className="flex items-center gap-1">
+                  <Calendar className="h-3.5 w-3.5" />
+                  {new Date(post.createdAt).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </div>
               </div>
             </div>
-          </div>
-        </Link>
-      ))}
+          </Link>
+        );
+      })}
     </div>
   );
 }
