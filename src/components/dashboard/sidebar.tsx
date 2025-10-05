@@ -2,7 +2,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { LayoutDashboard, FileText, PenSquare, Menu, X, Loader2 } from "lucide-react"
+import { LayoutDashboard, FileText, PenSquare, Menu, X, Loader2, ChevronRight } from "lucide-react"
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 
@@ -54,10 +54,10 @@ export default function Sidebar() {
       <Button
         variant="outline"
         size="icon"
-        className="fixed top-5 left-4 z-50 lg:hidden backdrop-blur-md bg-background/80 border-border/50"
+        className="fixed top-16 left-5 z-50 lg:hidden backdrop-blur-md bg-background/80 border-border/50"
         onClick={() => setIsOpen(!isOpen)}
       >
-        {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+        {isOpen ? <X className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
       </Button>
 
       {/* Overlay for mobile */}

@@ -126,7 +126,7 @@ export default function LoginPage() {
             <div className="text-center text-xs sm:text-sm text-muted-foreground pt-2">
               Don't have an account?{" "}
               <a
-                href="/signup"
+                href="/register"
                 className="font-medium text-primary hover:underline underline-offset-4 transition-colors"
               >
                 Sign up

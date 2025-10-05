@@ -1,5 +1,8 @@
 # Portfolio Pro
 
+admin: admin@blog.com || 123456
+user: user@blog.com || 123456
+
 A modern, full-stack portfolio website with integrated blog functionality, built with Next.js 15 and featuring a sleek, responsive design with advanced animations and user authentication.
 
 ## 🚀 Live Deployment
