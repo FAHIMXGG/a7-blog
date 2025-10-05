@@ -54,7 +54,7 @@ export default function Sidebar() {
       <Button
         variant="outline"
         size="icon"
-        className="fixed top-4 left-4 z-50 lg:hidden backdrop-blur-md bg-background/80 border-border/50"
+        className="fixed top-5 left-4 z-50 lg:hidden backdrop-blur-md bg-background/80 border-border/50"
         onClick={() => setIsOpen(!isOpen)}
       >
         {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
